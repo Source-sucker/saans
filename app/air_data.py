@@ -26,6 +26,7 @@ _TIMEOUT = httpx.Timeout(8.0)
 _RETRIES = 2
 
 _cache: dict[tuple[float, float], tuple[float, dict]] = {}
+_geo_cache: dict[str, dict] = {}
 _scenarios: dict[str, dict] | None = None
 
 
@@ -171,10 +172,14 @@ async def get_air(city: str, client: httpx.AsyncClient, now_iso: str | None = No
     scenarios = _load_scenarios()
     key_name = city.strip().lower()
     scenario = scenarios.get(key_name)
-    try:
-        geo = await geocode(city, client)
-    except httpx.HTTPError:
-        geo = None
+    geo = _geo_cache.get(key_name)
+    if geo is None:
+        try:
+            geo = await geocode(city, client)
+        except httpx.HTTPError:
+            geo = None
+        if geo is not None:
+            _geo_cache[key_name] = geo
     if geo:
         key = _round_key(geo["latitude"], geo["longitude"])
         cached = _cache.get(key)
@@ -200,6 +205,7 @@ async def get_air(city: str, client: httpx.AsyncClient, now_iso: str | None = No
 
 def clear_cache() -> None:
     _cache.clear()
+    _geo_cache.clear()
 
 
 def get_scenario_air(city_or_id: str) -> dict | None:

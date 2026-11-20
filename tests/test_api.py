@@ -134,11 +134,14 @@ class TestRateLimit:
                 break
         assert 429 in codes
 
-    def test_health_not_blocked_after_plan_burst(self):
-        # /api/health counts toward the same limiter (it is under /api/) but the
-        # limiter resets per test; just verify health works when quota remains
+    def test_health_and_strings_not_rate_limited(self):
+        # only compute routes (/api/plan, /api/ask) are limited
+        for _ in range(25):
+            client.get("/api/health")
+            client.get("/api/strings")
         r = client.get("/api/health")
-        assert r.status_code in (200, 429)
+        assert r.status_code == 200
+        assert client.get("/api/strings").status_code == 200
 
 
 class TestHealth:

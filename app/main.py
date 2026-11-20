@@ -50,9 +50,12 @@ app = FastAPI(title="Saans", docs_url=None, redoc_url=None, openapi_url="/api/op
 app.mount("/static", StaticFiles(directory=_STATIC), name="static")
 
 
+_RATE_LIMITED = ("/api/plan", "/api/ask")
+
+
 @app.middleware("http")
 async def security_and_rate_limit(request: Request, call_next):
-    if request.url.path.startswith("/api/"):
+    if request.url.path.startswith(_RATE_LIMITED):
         ip = request.client.host if request.client else "unknown"
         if not limiter.check(ip):
             return JSONResponse({"detail": "Too many requests. Try again in a minute."},

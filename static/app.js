@@ -17,8 +17,14 @@ function el(tag, className, text) {
 }
 
 async function loadStrings() {
-  const res = await fetch("/api/strings");
-  state.strings = await res.json();
+  for (let attempt = 0; attempt < 3 && !state.strings; attempt++) {
+    try {
+      const res = await fetch("/api/strings");
+      if (res.ok) state.strings = await res.json();
+    } catch (e) { /* retry */ }
+    if (!state.strings) await new Promise(r => setTimeout(r, 500));
+  }
+  if (!state.strings) state.strings = { en: {}, hi: {} };  // keys fall back to ids
 }
 
 function memberRow(m = { label: "", age: "", sensitive: false }) {
@@ -134,7 +140,9 @@ function renderPlan(plan) {
 
 function renderAction(a) {
   const card = el("article", "action" + (a.id === "co_safety" ? " safety" : ""));
-  card.append(el("h3", null, a[state.lang === "hi" ? "hi" : "en"]));
+  const head = el("h3", null, a.id.replace(/_/g, " ") + " (" + a.category + ")");
+  card.append(head);
+  card.append(el("p", null, a[state.lang === "hi" ? "hi" : "en"]));
 
   const why = el("p", "why", t("why_this") + " " + (a.why.rule_id) + ": " + (a.why.trigger));
   card.append(why);
