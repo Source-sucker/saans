@@ -5,37 +5,193 @@
     "method": "Piecewise-linear sub-index per pollutant; overall AQI = worst (max) sub-index, per CPCB."
   },
   "bands": [
-    { "name": "Good",          "range": [0, 50] },
-    { "name": "Satisfactory",  "range": [51, 100] },
-    { "name": "Moderate",      "range": [101, 200] },
-    { "name": "Poor",          "range": [201, 300] },
-    { "name": "Very Poor",     "range": [301, 400] },
-    { "name": "Severe",        "range": [401, 500] }
+    {
+      "name": "Good",
+      "range": [
+        0,
+        50
+      ]
+    },
+    {
+      "name": "Satisfactory",
+      "range": [
+        51,
+        100
+      ]
+    },
+    {
+      "name": "Moderate",
+      "range": [
+        101,
+        200
+      ]
+    },
+    {
+      "name": "Poor",
+      "range": [
+        201,
+        300
+      ]
+    },
+    {
+      "name": "Very Poor",
+      "range": [
+        301,
+        400
+      ]
+    },
+    {
+      "name": "Severe",
+      "range": [
+        401,
+        500
+      ]
+    }
   ],
   "pollutants": {
     "pm25": {
       "label": "PM2.5",
       "unit": "µg/m³, 24-hour mean",
-      "breakpoints": [ [0, 0], [30, 50], [60, 100], [90, 200], [120, 300], [250, 400], [250, null] ]
+      "breakpoints": [
+        [
+          0,
+          0
+        ],
+        [
+          30,
+          50
+        ],
+        [
+          60,
+          100
+        ],
+        [
+          90,
+          200
+        ],
+        [
+          120,
+          300
+        ],
+        [
+          250,
+          400
+        ],
+        [
+          250,
+          null
+        ]
+      ]
     },
     "pm10": {
       "label": "PM10",
       "unit": "µg/m³, 24-hour mean",
-      "breakpoints": [ [0, 0], [50, 50], [100, 100], [250, 200], [350, 300], [430, 400], [430, null] ]
+      "breakpoints": [
+        [
+          0,
+          0
+        ],
+        [
+          50,
+          50
+        ],
+        [
+          100,
+          100
+        ],
+        [
+          250,
+          200
+        ],
+        [
+          350,
+          300
+        ],
+        [
+          430,
+          400
+        ],
+        [
+          430,
+          null
+        ]
+      ]
     }
   },
   "above_top_breakpoint": "Concentrations above the top breakpoint get sub-index 500 (band Severe). CPCB publishes no extrapolation formula above the top breakpoint; the bulletin caps the index at 500.",
   "grap": {
     "applies_to": "National Capital Region (NCR) only; shown for no other city.",
     "stages": [
-      { "stage": "I",   "name": "Poor",      "range": [201, 300] },
-      { "stage": "II",  "name": "Very Poor", "range": [301, 400] },
-      { "stage": "III", "name": "Severe",    "range": [401, 450] },
-      { "stage": "IV",  "name": "Severe+",   "range": [451, 500] }
+      {
+        "stage": "I",
+        "name": "Poor",
+        "range": [
+          201,
+          300
+        ]
+      },
+      {
+        "stage": "II",
+        "name": "Very Poor",
+        "range": [
+          301,
+          400
+        ]
+      },
+      {
+        "stage": "III",
+        "name": "Severe",
+        "range": [
+          401,
+          450
+        ]
+      },
+      {
+        "stage": "IV",
+        "name": "Severe+",
+        "range": [
+          451,
+          500
+        ]
+      }
     ],
     "source_name": "CAQM, Revised GRAP Schedule for NCR and adjoining areas (revision 29.09.2026)",
     "source_url": "https://caqm.nic.in/FileUploadDomain/WebsiteDocument/GRAP/GRAP%20Schedule/01fcdebf-83e1-4cfe-bc0c-d0b1470a4d4e.pdf",
-    "source_year": 2026
+    "source_year": 2026,
+    "ncr_districts": {
+      "delhi": "whole union territory of Delhi",
+      "haryana": [
+        "Bhiwani",
+        "Charkhi Dadri",
+        "Faridabad",
+        "Gurgaon",
+        "Jhajjar",
+        "Jind",
+        "Karnal",
+        "Mahendragarh",
+        "Nuh",
+        "Palwal",
+        "Panipat",
+        "Rewari",
+        "Rohtak",
+        "Sonipat"
+      ],
+      "uttar_pradesh": [
+        "Baghpat",
+        "Bulandshahr",
+        "Gautam Buddh Nagar",
+        "Ghaziabad",
+        "Hapur",
+        "Meerut",
+        "Muzaffarnagar",
+        "Shamli"
+      ],
+      "rajasthan": [
+        "Alwar",
+        "Bharatpur"
+      ]
+    },
+    "ncr_source": "NCR constituent districts per the 2021 Regional Plan (NCR Planning Board), as listed in Wikipedia 'National Capital Region (India)', accessed 2026-11-20"
   },
   "sources": [
     {

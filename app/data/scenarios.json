@@ -1,0 +1,35 @@
+{
+  "note": "Sample data for offline/demo use, clearly labelled 'sample' in the app. Values are realistic winter profiles for each city, NOT live measurements.",
+  "scenarios": [
+    {
+      "id": "delhi-severe",
+      "city": "Delhi",
+      "in_ncr": true,
+      "timezone": "Asia/Kolkata",
+      "latitude": 28.6139,
+      "longitude": 77.209,
+      "current": { "pm25": 292, "pm10": 445 },
+      "hourly_pm25": [330, 340, 345, 350, 348, 342, 330, 315, 295, 275, 260, 250, 245, 240, 238, 240, 245, 252, 260, 270, 282, 295, 310, 320]
+    },
+    {
+      "id": "lucknow-very-poor",
+      "city": "Lucknow",
+      "in_ncr": false,
+      "timezone": "Asia/Kolkata",
+      "latitude": 26.8467,
+      "longitude": 80.9462,
+      "current": { "pm25": 188, "pm10": 305 },
+      "hourly_pm25": [215, 222, 228, 232, 230, 225, 214, 200, 185, 170, 158, 150, 145, 142, 140, 142, 147, 155, 165, 178, 190, 202, 210, 214]
+    },
+    {
+      "id": "pune-satisfactory",
+      "city": "Pune",
+      "in_ncr": false,
+      "timezone": "Asia/Kolkata",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "current": { "pm25": 42, "pm10": 78 },
+      "hourly_pm25": [52, 54, 55, 56, 55, 52, 47, 42, 38, 34, 31, 29, 28, 27, 27, 28, 30, 33, 37, 41, 45, 49, 52, 53]
+    }
+  ]
+}
