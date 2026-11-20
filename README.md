@@ -122,7 +122,7 @@ pip install -r requirements.txt
 python -m pytest --cov=app --cov-report=term
 ```
 
-Measured on the final code (Python 3.12): **205 tests, 93% coverage** (aqi 95,
+Measured on the final code (Python 3.12): **205 tests, 94% coverage** (aqi 95,
 air_data 95, engine 97, impact 98, main 98, models 96, ai 81 – the uncovered ai
 lines are the real-Gemini call path, exercised only with a live key).
 
