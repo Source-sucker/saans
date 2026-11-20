@@ -57,31 +57,29 @@ def _action_ids(plan: dict) -> set[str]:
 
 
 _NUM_RE = re.compile(r"-?\d+\.\d+|-?\d+")
-# tokens that contain digits but are not quantities the model could be inventing
-_NEUTRAL = re.compile(r"CO2e|PM2\.5|PM10|FFP2|MERV-?13|N95|R\d+|\d{1,2}:\d{2}|\d{4}")
+# digit-bearing tokens that are names, not quantities (checked before number extraction)
+_NEUTRAL = re.compile(r"CO2e|PM2\.5|PM10|FFP2|MERV-?13|N95|R\d+")
 _TIME_RE = re.compile(r"\b\d{1,2}:\d{2}\b")
-
-
-def _reply_numbers(reply: str) -> list[str]:
-    """Number tokens in the reply, excluding chemical names, rule ids and clock times."""
-    text = _NEUTRAL.sub("§", reply)
-    return _NUM_RE.findall(text)
 
 
 def numguard(reply: str, plan: dict) -> bool:
     """True if every number in the reply appears in the engine's numbers.
 
-    Clock times are checked against the best-block window when present.
+    Clock times must be the best-block window; names like CO2e/PM2.5 are not
+    quantities; small counting words in prose are tolerated.
     """
     allowed = _engine_numbers(plan)
     best = plan.get("best_block") or {}
     time_ok = {best.get("start"), best.get("end")} - {None}
-    for m in _reply_numbers(reply):
+    # check clock times first, then remove them from the text
+    for tm in _TIME_RE.findall(reply):
+        if tm not in time_ok:
+            return False
+    text = _TIME_RE.sub(" § ", _NEUTRAL.sub("§", reply))
+    for m in _NUM_RE.findall(text):
         if m in allowed:
             continue
         if m.rstrip("0").rstrip(".") in allowed or m + ".0" in allowed:
-            continue
-        if _TIME_RE.fullmatch(m) and m in time_ok:
             continue
         if m in {"0", "1", "2", "3", "5"}:  # small counting words in prose
             continue

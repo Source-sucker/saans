@@ -75,10 +75,11 @@ def co2e_induction_swap(factors: dict, meal_units: float = 3.0) -> dict:
     lpg_emis = lpg_co2 * (meal_units / eff_g) / lpg_kwh
     ind_emis = grid * (meal_units / eff_i)
     delta = lpg_emis - ind_emis
+    lo, hi = (delta * 0.8, delta * 1.2) if delta >= 0 else (delta * 1.2, delta * 0.8)
     return {
         "value": round(delta, 3),
-        "low": round(delta * 0.8, 3),
-        "high": round(delta * 1.2, 3),
+        "low": round(lo, 3),
+        "high": round(hi, 3),
         "formula": (
             f"LPG: {lpg_co2} kgCO2e/kg / ({lpg_kwh} kWh/kg x {eff_g} gas eff) = "
             f"{lpg_co2 / lpg_kwh / eff_g:.4f} kgCO2e per delivered kWh; "
