@@ -1,0 +1,82 @@
+{
+  "grid_co2_india": {
+    "value": 0.675,
+    "unit": "kg CO2e per kWh (0.675 tCO2/MWh)",
+    "source_name": "CEA CO2 Baseline Database for the Indian Power Sector, Version 22.0 (weighted average, incl. renewable generation)",
+    "source_url": "https://cea.nic.in/cdm-co2-baseline-database/?lang=en",
+    "year": 2026,
+    "uncertainty": "Annual grid average for FY 2025-26; actual marginal emissions vary by region, season and hour. CO2 only (CH4/N2O not included)."
+  },
+  "car_avg": {
+    "value": 0.16691,
+    "unit": "kg CO2e per km (average car, unknown fuel type)",
+    "source_name": "UK DEFRA/DESNZ Greenhouse gas reporting: conversion factors 2024, condensed set",
+    "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    "year": 2024,
+    "uncertainty": "UK average fleet; Indian petrol/diesel cars are broadly comparable in size and emissions class, but this is a proxy, not an India-specific factor."
+  },
+  "motorbike_avg": {
+    "value": 0.11367,
+    "unit": "kg CO2e per km (average motorbike, petrol)",
+    "source_name": "UK DEFRA/DESNZ Greenhouse gas reporting: conversion factors 2024, condensed set",
+    "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    "year": 2024,
+    "uncertainty": "UK average motorbike; most Indian two-wheelers are smaller (70-125cc), so this overestimates. Proxy factor."
+  },
+  "bus_local": {
+    "value": 0.12999,
+    "unit": "kg CO2e per passenger-km (local bus)",
+    "source_name": "UK DEFRA/DESNZ Greenhouse gas reporting: conversion factors 2024, condensed set",
+    "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    "year": 2024,
+    "uncertainty": "UK local bus average; occupancy on Indian city buses is typically much higher, so per-passenger emissions are lower in practice. Proxy factor."
+  },
+  "rail_national": {
+    "value": 0.03546,
+    "unit": "kg CO2e per passenger-km (national rail)",
+    "source_name": "UK DEFRA/DESNZ Greenhouse gas reporting: conversion factors 2024, condensed set",
+    "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    "year": 2024,
+    "uncertainty": "UK national rail (mostly electrified); Indian metro rail draws from the Indian grid, which is more carbon-intensive per kWh than UK rail traction. Proxy factor."
+  },
+  "lpg_kg": {
+    "value": 2.93936,
+    "unit": "kg CO2e per kg LPG burnt",
+    "source_name": "UK DEFRA/DESNZ Greenhouse gas reporting: conversion factors 2024, condensed set",
+    "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    "year": 2024,
+    "uncertainty": "Combustion emissions only; LPG composition (propane/butane mix) varies slightly by country."
+  },
+  "induction_efficiency": {
+    "value": 0.9,
+    "unit": "fraction of energy transferred to food (induction cooking, 'up to')",
+    "source_name": "Sweeney et al., ACEEE Summer Study on Energy Efficiency in Buildings (2014), Induction Cooking Technology Design and Assessment",
+    "source_url": "https://www.aceee.org/files/proceedings/2014/data/papers/9-702.pdf",
+    "year": 2014,
+    "uncertainty": "ACEEE reports 'up to 90%'; measured efficiency varies with vessel and use (the same paper shows induction is not always more efficient in practice)."
+  },
+  "gas_efficiency": {
+    "value": 0.4,
+    "unit": "fraction of energy transferred to food (LPG gas stove)",
+    "source_name": "Sweeney et al., ACEEE Summer Study on Energy Efficiency in Buildings (2014), Induction Cooking Technology Design and Assessment",
+    "source_url": "https://www.aceee.org/files/proceedings/2014/data/papers/9-702.pdf",
+    "year": 2014,
+    "uncertainty": "Gas-stove efficiency measured on US equipment; Indian LPG burner stoves are in a similar class."
+  },
+  "dmrc_metro_saving": {
+    "value": 32.38,
+    "unit": "grams CO2 saved per passenger-km when riding metro instead of a road vehicle",
+    "source_name": "Delhi Metro Rail Corporation (DMRC), figure from a TERI study, cited on DMRC's carbon-lite metro travel page",
+    "source_url": "https://delhimetrorail.com/carbonlite-metro-travel",
+    "year": 2024,
+    "uncertainty": "DMRC corporate figure comparing metro with an average road vehicle; the underlying study is not published in full, and the page is undated (accessed 2026-11-20)."
+  },
+  "lpg_kwh_per_kg": {
+    "value": 12.762,
+    "unit": "kWh per kg LPG (net CV basis)",
+    "source_name": "UK DEFRA/DESNZ GHG conversion factors 2024, Fuel properties table",
+    "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
+    "year": 2024,
+    "uncertainty": "Energy content, not an emission factor; LPG propane/butane mix varies slightly."
+  }
+}
