@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saans - Winter Smog Assistant</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#results">Skip to results</a>
+<header>
+  <h1 id="app-title">Saans</h1>
+  <p id="tagline" aria-live="off">Your city, your household, today's plan.</p>
+  <div class="controls">
+    <button id="lang-toggle" type="button" aria-label="Switch language">हिन्दी</button>
+    <label class="toggle"><input type="checkbox" id="large-text"> <span id="large-text-label">Large text</span></label>
+  </div>
+</header>
+<main>
+  <form id="plan-form" aria-labelledby="form-heading">
+    <h2 id="form-heading">Tell us your household</h2>
+    <div class="field">
+      <label for="city" id="city-label">City</label>
+      <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="e.g. Delhi" required maxlength="80" aria-describedby="city-hint">
+      <p class="hint" id="city-hint">Live data from Open-Meteo. Sample cities work offline too.</p>
+    </div>
+
+    <fieldset id="members-fieldset">
+      <legend id="members-title">Household members</legend>
+      <div id="members"></div>
+      <button type="button" id="add-member">Add member</button>
+    </fieldset>
+
+    <fieldset>
+      <legend id="home-title">Home</legend>
+      <label class="checkbox"><input type="checkbox" id="purifier"> <span data-i="purifier">Air purifier at home</span></label>
+      <label class="checkbox"><input type="checkbox" id="unvented"> <span data-i="unvented">Unvented coal/angithi or heater indoors</span></label>
+      <div class="field">
+        <label for="cooking-fuel" id="cooking-fuel-label">Cooking fuel</label>
+        <select id="cooking-fuel">
+          <option value="">--</option>
+          <option value="gas">LPG/PNG gas</option>
+          <option value="biomass">Biomass/chulha</option>
+          <option value="induction">Induction</option>
+          <option value="electric">Electric</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend id="commute-title">Commute</legend>
+      <div class="field">
+        <label for="commute-mode" id="commute-mode-label">Main commute mode</label>
+        <select id="commute-mode">
+          <option value="">--</option>
+          <option value="walk">Walk</option>
+          <option value="cycle">Cycle</option>
+          <option value="two_wheeler">Two-wheeler</option>
+          <option value="car">Car</option>
+          <option value="metro">Metro</option>
+          <option value="bus">Bus</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="commute-km" id="commute-km-label">One-way distance (km)</label>
+        <input id="commute-km" type="number" min="0" max="500" step="0.5" value="10">
+      </div>
+    </fieldset>
+
+    <button type="submit" id="get-plan" class="primary">Get today's plan</button>
+    <p id="form-error" role="alert" class="error" hidden></p>
+  </form>
+
+  <section id="results" aria-live="polite" aria-labelledby="results-heading" hidden>
+    <h2 id="results-heading" tabindex="-1">Today's plan</h2>
+    <div id="status-line"></div>
+    <div id="aqi-line" class="aqi-card"></div>
+    <h3 id="members-cards-title">Member by member</h3>
+    <div id="member-cards"></div>
+    <div id="action-list"></div>
+    <section id="community-card" class="community" aria-labelledby="community-title-el" hidden>
+      <h3 id="community-title-el">Community message (RWA / school)</h3>
+      <div class="field">
+        <label for="households" id="community-households-label">Households doing this</label>
+        <input type="number" id="households" min="2" max="100000" value="50">
+        <p id="community-math" class="math"></p>
+      </div>
+      <pre id="community-message"></pre>
+      <div class="row">
+        <button type="button" id="copy-message">Copy</button>
+        <button type="button" id="print-message">Print</button>
+      </div>
+    </section>
+    <section id="ask-card" aria-labelledby="ask-title-el">
+      <h3 id="ask-title-el">Ask about this plan</h3>
+      <label for="ask-input" class="visually-hidden" id="ask-label">Question</label>
+      <textarea id="ask-input" rows="2" maxlength="300" placeholder="e.g. When can I open the windows?"></textarea>
+      <button type="button" id="ask-button">Ask</button>
+      <p id="ask-answer" aria-live="polite"></p>
+      <p id="ask-source" class="hint"></p>
+    </section>
+  </section>
+</main>
+<footer>
+  <p id="footer-note">Saans is not medical advice. For symptoms, see a doctor. Sources for every number are in the app and README.</p>
+</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>
