@@ -102,7 +102,9 @@ function renderPlan(plan) {
   const value = el("span", "aqi-value", String(plan.aqi));
   const bandChip = el("span", "band-chip " + bandClass(plan.band),
                       (BAND_PATTERNS[plan.band] || "") + " " + plan.band);
-  const src = el("span", "hint", plan.source === "Open-Meteo (live)" ? t("live_label") : (plan.source || ""));
+  const src = el("span", "hint", plan.source === "Open-Meteo (live)" ? t("live_source")
+    : plan.source && plan.source.startsWith("manual") ? t("manual_source")
+    : plan.source && plan.source.startsWith("sample") ? t("sample_source") : (plan.source || ""));
   aqiCard.append(value, bandChip, src);
   if (plan.grap_stage) {
     aqiCard.append(el("span", "band-chip", t("grap_label") + " " + plan.grap_stage));
@@ -134,7 +136,8 @@ function renderPlan(plan) {
     list.append(renderAction(a));
   }
 
-  renderCommunity(plan.community);
+  if (plan.community) renderCommunity(plan.community);
+  else $("community-card").hidden = true;
   $("results-heading").focus();
 }
 
@@ -188,6 +191,23 @@ function updateCommunityMath(c) {
   const total = (per * n).toFixed(1);
   $("community-math").textContent =
     t("community_total") + ": " + total + " kg CO2e = " + per.toFixed(3) + " x " + n;
+}
+
+async function getManualPlan() {
+  const pm25 = $("manual-pm25").value;
+  const pm10 = $("manual-pm10").value;
+  if (pm25 === "" && pm10 === "") return;
+  const city = $("city").value.trim() || "Delhi";
+  $("form-error").hidden = true;
+  try {
+    const plan = await api("/api/plan/manual", { city, pm25: pm25 === "" ? null : Number(pm25),
+      pm10: pm10 === "" ? null : Number(pm10), profile: collectProfile() });
+    renderPlan(plan);
+  } catch (e) {
+    const err = $("form-error");
+    err.textContent = t(e.message || "error_generic");
+    err.hidden = false;
+  }
 }
 
 async function getPlan() {
@@ -247,7 +267,13 @@ function applyStrings() {
   $("ask-button").textContent = s.ask_button;
   $("copy-message").textContent = s.copy;
   $("print-message").textContent = s.print;
-  $("results-heading").textContent = s.members_cards_title ? "Today's plan" : "Today's plan";
+  $("results-heading").textContent = s.results_heading;
+  for (const [selId, optKey] of [["cooking-fuel", "cooking_fuel_options"], ["commute-mode", "commute_mode_options"]]) {
+    const sel = $(selId);
+    for (const opt of sel.options) {
+      if (opt.value && s[optKey] && s[optKey][opt.value]) opt.textContent = s[optKey][opt.value];
+    }
+  }
   if (state.plan) renderPlan(state.plan);  // re-render with new language
 }
 
@@ -274,6 +300,7 @@ function init() {
     setTimeout(() => ($("copy-message").textContent = t("copy")), 1500);
   });
   $("print-message").addEventListener("click", () => window.print());
+  $("manual-button").addEventListener("click", getManualPlan);
 }
 
 document.addEventListener("DOMContentLoaded", init);

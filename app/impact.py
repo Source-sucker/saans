@@ -95,14 +95,3 @@ def co2e_induction_swap(factors: dict, meal_units: float = 3.0) -> dict:
         "year": factors["grid_co2_india"]["year"],
         "note": "Honest result: on today's Indian grid, induction emits MORE CO2e per meal than LPG. The swap still removes indoor combustion pollutants (CO, NO2, PM2.5) from the kitchen.",
     }
-
-
-_EXPOSURE_LABEL = {"lower": "Lower", "much lower": "Much lower", "n/a": "n/a"}
-
-
-def exposure_effect(level: str) -> str:
-    """Qualitative exposure label for an action; never a made-up percentage."""
-    try:
-        return _EXPOSURE_LABEL[level]
-    except KeyError:
-        raise ValueError(f"unknown exposure level {level!r}") from None

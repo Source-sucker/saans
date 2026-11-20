@@ -16,10 +16,24 @@
     "purifier": "Air purifier at home",
     "unvented": "Unvented coal/angithi or heater indoors",
     "cooking_fuel": "Cooking fuel",
-    "cooking_fuel_options": {"lpg": "LPG", "png": "PNG", "gas": "LPG/PNG gas", "biomass": "Biomass/chulha", "induction": "Induction", "electric": "Electric"},
+    "cooking_fuel_options": {
+      "lpg": "LPG",
+      "png": "PNG",
+      "gas": "LPG/PNG gas",
+      "biomass": "Biomass/chulha",
+      "induction": "Induction",
+      "electric": "Electric"
+    },
     "commute_title": "Commute",
     "commute_mode": "Main commute mode",
-    "commute_mode_options": {"walk": "Walk", "cycle": "Cycle", "two_wheeler": "Two-wheeler", "car": "Car", "metro": "Metro", "bus": "Bus"},
+    "commute_mode_options": {
+      "walk": "Walk",
+      "cycle": "Cycle",
+      "two_wheeler": "Two-wheeler",
+      "car": "Car",
+      "metro": "Metro",
+      "bus": "Bus"
+    },
     "commute_km": "One-way distance (km)",
     "get_plan": "Get today's plan",
     "loading": "Getting your plan...",
@@ -57,7 +71,16 @@
     "footer_note": "Saans is not medical advice. For symptoms, see a doctor. Sources for every number are in the app and README.",
     "error_city": "City not found. Try Delhi, Lucknow or Pune (samples work offline).",
     "error_generic": "Something went wrong. Please try again.",
-    "error_rate": "Too many requests. Wait a minute and try again."
+    "error_rate": "Too many requests. Wait a minute and try again.",
+    "manual_title": "Have your own reading? (e.g. from the CPCB bulletin)",
+    "manual_pm25": "PM2.5 (µg/m³)",
+    "manual_pm10": "PM10 (µg/m³)",
+    "manual_button": "Use my reading",
+    "manual_hint": "No forecast is available in this mode, so time-window advice is general.",
+    "results_heading": "Today's plan",
+    "manual_source": "Your manual reading",
+    "live_source": "Live data",
+    "sample_source": "Sample data"
   },
   "hi": {
     "app_title": "Saans - सर्दी की धुंध सहायक",
@@ -76,10 +99,24 @@
     "purifier": "घर में एयर प्योरिफायर",
     "unvented": "घर के अंदर बिना वेंटिलेशन का अंगीठी/हीटर",
     "cooking_fuel": "रसोई ईंधन",
-    "cooking_fuel_options": {"lpg": "LPG", "png": "PNG", "gas": "LPG/PNG गैस", "biomass": "बायोमास/चूल्हा", "induction": "इंडक्शन", "electric": "बिजली"},
+    "cooking_fuel_options": {
+      "lpg": "LPG",
+      "png": "PNG",
+      "gas": "LPG/PNG गैस",
+      "biomass": "बायोमास/चूल्हा",
+      "induction": "इंडक्शन",
+      "electric": "बिजली"
+    },
     "commute_title": "यात्रा",
     "commute_mode": "मुख्य यात्रा साधन",
-    "commute_mode_options": {"walk": "पैदल", "cycle": "साइकिल", "two_wheeler": "दुपहिया", "car": "कार", "metro": "मेट्रो", "bus": "बस"},
+    "commute_mode_options": {
+      "walk": "पैदल",
+      "cycle": "साइकिल",
+      "two_wheeler": "दुपहिया",
+      "car": "कार",
+      "metro": "मेट्रो",
+      "bus": "बस"
+    },
     "commute_km": "एक तरफ की दूरी (कि.मी.)",
     "get_plan": "आज की योजना बनाएं",
     "loading": "योजना बन रही है...",
@@ -117,6 +154,15 @@
     "footer_note": "Saans चिकित्सकीय सलाह नहीं है। लक्षण हों तो डॉक्टर से मिलें। हर संख्या के स्रोत ऐप और README में हैं।",
     "error_city": "शहर नहीं मिला। दिल्ली, लखनऊ या पुणे आज़माएं (सैंपल ऑफलाइन चलते हैं)।",
     "error_generic": "कुछ गड़बड़ हुई। फिर कोशिश करें।",
-    "error_rate": "बहुत ज्यादा अनुरोध। एक मिनट रुककर फिर कोशिश करें।"
+    "error_rate": "बहुत ज्यादा अनुरोध। एक मिनट रुककर फिर कोशिश करें।",
+    "manual_title": "आपकी अपनी रीडिंग है? (जैसे CPCB बुलेटिन से)",
+    "manual_pm25": "PM2.5 (µg/m³)",
+    "manual_pm10": "PM10 (µg/m³)",
+    "manual_button": "मेरी रीडिंग इस्तेमाल करें",
+    "manual_hint": "इस मोड में पूर्वानुमान नहीं है, इसलिए समय-खंड की सलाह सामान्य होगी।",
+    "results_heading": "आज की योजना",
+    "manual_source": "आपकी रीडिंग",
+    "live_source": "लाइव डेटा",
+    "sample_source": "सैंपल डेटा"
   }
 }

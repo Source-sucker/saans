@@ -23,7 +23,6 @@ class Home(BaseModel):
 class Commute(BaseModel):
     mode: str | None = Field(default=None, pattern="^(walk|cycle|two_wheeler|car|metro|bus)$")
     km: float | None = Field(default=None, ge=0, le=500)
-    carpool_passengers: int = Field(default=2, ge=2, le=6)
 
 
 class Profile(BaseModel):
@@ -56,6 +55,13 @@ class AskRequest(BaseModel):
     # plan context is re-derived server-side from city+profile; never trusted from client
     city: str = Field(min_length=1, max_length=80)
     profile: Profile = Field(default_factory=Profile)
+
+    @field_validator("city")
+    @classmethod
+    def city_charset(cls, v: str) -> str:
+        if not CITY_RE.match(v):
+            raise ValueError("city: letters, spaces, apostrophes, hyphens, commas only")
+        return v.strip()
 
 
 class ManualAQIRequest(BaseModel):

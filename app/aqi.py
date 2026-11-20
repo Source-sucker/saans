@@ -1,12 +1,7 @@
 """CPCB AQI computation: sub-indices, band, NCR GRAP stage. Pure functions."""
 from __future__ import annotations
 
-import json
-from functools import lru_cache
 from itertools import pairwise
-from pathlib import Path
-
-DATA = Path(__file__).parent / "data"
 
 # PM2.5 / PM10 24h breakpoints: (concentration µg/m³, sub-index). CPCB 2014.
 _PM25 = [(0, 0), (30, 50), (60, 100), (90, 200), (120, 300), (250, 400)]
@@ -86,7 +81,3 @@ def grap_stage(aqi_value: int, in_ncr: bool) -> str | None:
         return "I"
     return None
 
-
-@lru_cache(maxsize=1)
-def bands_doc() -> dict:
-    return json.loads((DATA / "aqi_bands.json").read_text())

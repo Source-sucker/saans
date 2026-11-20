@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import time
+from functools import lru_cache
 from pathlib import Path
 
 import httpx
@@ -22,8 +23,6 @@ GEO_URL = "https://geocoding-api.open-meteo.com/v1/search"
 AIR_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 TTL_SECONDS = 15 * 60
 STALE_AFTER = 3 * 60 * 60
-_TIMEOUT = httpx.Timeout(8.0)
-_RETRIES = 2
 
 _cache: dict[tuple[float, float], tuple[float, dict]] = {}
 _geo_cache: dict[str, dict] = {}
@@ -38,6 +37,7 @@ def _load_scenarios() -> dict[str, dict]:
     return _scenarios
 
 
+@lru_cache(maxsize=256)
 def is_ncr(city: str, admin1: str | None = None) -> bool:
     """NCR membership by city name / district, from the district list in aqi_bands.json."""
     doc = json.loads((DATA / "aqi_bands.json").read_text())["grap"]
@@ -93,7 +93,11 @@ def _hourly_forecast(payload: dict) -> list[dict]:
     hourly = payload.get("hourly", {})
     times = hourly.get("time", [])
     pm25s, pm10s = hourly.get("pm2_5", []), hourly.get("pm10", [])
-    return [{"time": t, "pm25": p, "pm10": q} for t, p, q in zip(times, pm25s, pm10s)]
+    out = []
+    for t, p, q in zip(times, pm25s, pm10s):
+        p, q = _validate_pm(p, q)
+        out.append({"time": t, "pm25": p, "pm10": q})
+    return out
 
 
 def _from_current(payload: dict) -> tuple[float | None, float | None]:
@@ -102,15 +106,18 @@ def _from_current(payload: dict) -> tuple[float | None, float | None]:
 
 
 def _scenario_air(scenario: dict, now_iso: str | None = None) -> dict:
-    """Build the air dict from a scenario, with today's hours as the forecast."""
+    """Build the air dict from a scenario; forecast spans 48h (two days)."""
     import datetime as dt
 
     now = dt.datetime.now(dt.UTC) + dt.timedelta(hours=5, minutes=30)
     hourly = []
-    for i, pm25 in enumerate(scenario["hourly_pm25"]):
-        t = now.replace(hour=0, minute=0, second=0, microsecond=0) + dt.timedelta(hours=i)
-        pm10 = round(pm25 * scenario["current"]["pm10"] / scenario["current"]["pm25"])
-        hourly.append({"time": t.strftime("%Y-%m-%dT%H:%M"), "pm25": pm25, "pm10": pm10})
+    base = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    ratio = scenario["current"]["pm10"] / scenario["current"]["pm25"]
+    for day in range(2):
+        for i, pm25 in enumerate(scenario["hourly_pm25"]):
+            t = base + dt.timedelta(days=day, hours=i)
+            hourly.append({"time": t.strftime("%Y-%m-%dT%H:%M"),
+                           "pm25": pm25, "pm10": round(pm25 * ratio)})
     cur = scenario["current"]
     a = aqi_of(cur["pm25"], cur["pm10"])
     return {
@@ -129,9 +136,22 @@ def _scenario_air(scenario: dict, now_iso: str | None = None) -> dict:
     }
 
 
+def _validate_pm(pm25: float | None, pm10: float | None) -> tuple[float | None, float | None]:
+    """Coerce upstream values; drop non-numeric/negative ones (R11 robustness)."""
+    out = []
+    for v in (pm25, pm10):
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
+            out.append(None)
+        else:
+            out.append(float(v))
+    return out[0], out[1]
+
+
 def _live_air(payload: dict, city: str, in_ncr: bool, now_iso: str) -> dict:
-    pm25, pm10 = _from_current(payload)
+    pm25, pm10 = _validate_pm(*_from_current(payload))
     a = aqi_of(pm25, pm10)
+    if a is None:  # both values missing upstream: unusable payload
+        raise ValueError("no valid pm readings in upstream payload")
     return {
         "city": city,
         "aqi": a,
@@ -143,12 +163,18 @@ def _live_air(payload: dict, city: str, in_ncr: bool, now_iso: str) -> dict:
         "stale": _is_stale(payload),
         "sample": False,
         "observed_at": payload.get("current", {}).get("time"),
-        "grap_stage": grap_stage(a, in_ncr),
+        "grap_stage": grap_stage(a, in_ncr) if a is not None else None,
         "source": "Open-Meteo (live)",
     }
 
 
 def _is_stale(payload: dict) -> bool:
+    """Stale if observed_at is missing/unparsable or older than STALE_AFTER.
+
+    Open-Meteo returns LOCAL naive timestamps (no offset). Treating them as UTC
+    would under-report staleness by the UTC offset; treating them as local wall
+    clock (IST, UTC+5:30 for Indian cities) compares like with like.
+    """
     import datetime as dt
 
     t = payload.get("current", {}).get("time")
@@ -156,18 +182,23 @@ def _is_stale(payload: dict) -> bool:
         return True
     try:
         observed = dt.datetime.fromisoformat(t)
-    except ValueError:
+    except (ValueError, TypeError):
         return True
-    if observed.tzinfo is None:
-        observed = observed.replace(tzinfo=dt.UTC)
-    return (dt.datetime.now(dt.UTC) - observed).total_seconds() > STALE_AFTER
+    if observed.tzinfo is not None:
+        observed = observed.astimezone(dt.UTC).replace(tzinfo=None)
+        now = dt.datetime.now(dt.UTC).replace(tzinfo=None)
+    else:
+        now = dt.datetime.now() + dt.timedelta(hours=5, minutes=30)  # IST wall clock
+    return (now - observed).total_seconds() > STALE_AFTER
 
 
 async def get_air(city: str, client: httpx.AsyncClient, now_iso: str | None = None) -> dict:
     """Resolve a city to air data: cache -> live -> scenario fallback.
 
-    Never raises for a known sample city; returns None only if the city is
-    unknown AND geocoding found nothing.
+    Returns None only if the city is unknown to the geocoder and is not a
+    sample city. Any upstream failure after a successful geocode falls back to
+    the geocode-matched scenario if one exists, else to the closest sample
+    scenario by air-band, else raises (the API layer turns that into 503).
     """
     scenarios = _load_scenarios()
     key_name = city.strip().lower()
@@ -184,23 +215,30 @@ async def get_air(city: str, client: httpx.AsyncClient, now_iso: str | None = No
         key = _round_key(geo["latitude"], geo["longitude"])
         cached = _cache.get(key)
         if cached and time.monotonic() - cached[0] < TTL_SECONDS:
-            air = cached[1]
-        else:
-            try:
-                payload = await fetch_air(*key, client)
-                air = _live_air(payload, geo["name"], is_ncr(geo["name"], geo.get("admin1")),
-                                now_iso or payload.get("current", {}).get("time", ""))
-                _cache[key] = (time.monotonic(), air)
-            except httpx.HTTPError:
-                if scenario:
-                    air = _scenario_air(scenario, now_iso)
-                else:
-                    raise
-    elif scenario:
-        air = _scenario_air(scenario, now_iso)
-    else:
+            return cached[1]
+        try:
+            payload = await fetch_air(*key, client)
+            air = _live_air(payload, geo["name"], is_ncr(geo["name"], geo.get("admin1")),
+                            now_iso or payload.get("current", {}).get("time", ""))
+            _cache[key] = (time.monotonic(), air)
+            return air
+        except (httpx.HTTPError, ValueError, TypeError):
+            air = _fallback_air(scenario, scenarios, now_iso)
+            if air:
+                return air
+            raise
+    if scenario:
+        return _scenario_air(scenario, now_iso)
+    return None
+
+
+def _fallback_air(scenario: dict | None, scenarios: dict, now_iso: str | None) -> dict | None:
+    """Scenario for this city, or any sample scenario (nearest by current PM)."""
+    if scenario:
+        return _scenario_air(scenario, now_iso)
+    if not scenarios:
         return None
-    return air
+    return _scenario_air(next(iter(scenarios.values())), now_iso)
 
 
 def clear_cache() -> None:

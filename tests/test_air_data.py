@@ -70,7 +70,7 @@ class TestGetAir:
         assert air["source"] == "Open-Meteo (live)"
         assert air["band"] == "Very Poor"  # pm25 250 -> sub 400; pm10 380 -> sub 338; worst 400
         assert air["grap_stage"] == "II"
-        assert len(air["forecast"]) == 24
+        assert len(air["forecast"]) == 24  # fixture has 24; live calls request 48
 
     async def test_unknown_city_returns_none(self):
         assert await get_air("Atlantis", FakeClient(geo={"results": []})) is None
@@ -84,6 +84,21 @@ class TestGetAir:
     async def test_geocode_empty_results_returns_none(self):
         # city genuinely unknown to the geocoder -> None (API returns 404-style error)
         assert await get_air("Atlantis", FakeClient(geo={"results": []})) is None
+
+    async def test_garbage_upstream_falls_back(self):
+        # missing pm values must not 500: falls back to a scenario, labelled sample
+        air = await get_air("Delhi", FakeClient(air={"current": {}, "hourly": {}}))
+        assert air["sample"] is True
+
+    async def test_null_pm_falls_back(self):
+        air = await get_air("Delhi", FakeClient(air=live_payload(pm25=None, pm10=None)))
+        assert air["sample"] is True
+
+    async def test_upstream_down_unknown_city_falls_back_to_any_scenario(self):
+        # geocode worked but air fetch failed and city is not a sample city:
+        # still degrade gracefully to a labelled sample rather than 500
+        air = await get_air("Jaipur", FakeClient(geo=geo_payload("Jaipur", 26.9, 75.8), air_error=True))
+        assert air["sample"] is True
 
     async def test_cache_hit_saves_second_call(self):
         c = FakeClient()
@@ -129,7 +144,7 @@ class TestScenarios:
         assert air is not None
         assert air["sample"] is True
         assert air["band"] == band
-        assert len(air["forecast"]) == 24
+        assert len(air["forecast"]) == 48  # two days, so late-evening users still get a best block
 
     def test_scenario_labels_itself_sample(self):
         assert get_scenario_air("pune")["source"].startswith("sample scenario")
@@ -157,10 +172,17 @@ class TestStaleness:
         air = await get_air("Delhi", FakeClient(air=live_payload(current_time="2026-11-19T01:00")))
         assert air["stale"] is True
 
-    async def test_fresh_data_not_stale(self):
-        # patch _is_stale clock reference: current time now vs fixed old stamp
-        air = await get_air("Delhi", FakeClient(air=live_payload(current_time="2026-11-20T09:00")))
-        assert air["stale"] in (True, False)  # computed against real clock
+    async def test_fresh_ist_data_not_stale(self):
+        import datetime as dt
+        fresh = (dt.datetime.now() + dt.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%dT%H:%M")
+        air = await get_air("Delhi", FakeClient(air=live_payload(current_time=fresh)))
+        assert air["stale"] is False
+
+    async def test_four_hour_old_ist_data_is_stale(self):
+        import datetime as dt
+        old = (dt.datetime.now() + dt.timedelta(hours=5, minutes=30) - dt.timedelta(hours=4)).strftime("%Y-%m-%dT%H:%M")
+        air = await get_air("Delhi", FakeClient(air=live_payload(current_time=old)))
+        assert air["stale"] is True
 
     def test_missing_time_is_stale(self):
         p = live_payload()

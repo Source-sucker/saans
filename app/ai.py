@@ -31,16 +31,16 @@ def _engine_numbers(plan: dict) -> set[str]:
     """Every number string the engine produced (plan + community + forecast)."""
     nums: set[str] = set()
 
-    def walk(node):
+    def walk(node, key=None):
         if isinstance(node, dict):
-            for v in node.values():
-                walk(v)
+            for k, v in node.items():
+                walk(v, k)
         elif isinstance(node, list):
             for v in node:
-                walk(v)
+                walk(v, key)
         elif isinstance(node, bool):
             pass
-        elif isinstance(node, (int, float)):
+        elif isinstance(node, (int, float)) and key not in ("priority", "households"):
             for s in (str(node), f"{node:g}", f"{node:.1f}", f"{node:.2f}", f"{node:.3f}"):
                 nums.add(s)
             if isinstance(node, float) and node.is_integer():
@@ -58,7 +58,7 @@ def _action_ids(plan: dict) -> set[str]:
 
 _NUM_RE = re.compile(r"-?\d+\.\d+|-?\d+")
 # digit-bearing tokens that are names, not quantities (checked before number extraction)
-_NEUTRAL = re.compile(r"CO2e|PM2\.5|PM10|FFP2|MERV-?13|N95|R\d+")
+_NEUTRAL = re.compile(r"CO2e|PM2\.5|PM10|FFP2|MERV-?13|N95|R\d+|aged \d+ and under")
 _TIME_RE = re.compile(r"\b\d{1,2}:\d{2}\b")
 
 
@@ -81,20 +81,29 @@ def numguard(reply: str, plan: dict) -> bool:
             continue
         if m.rstrip("0").rstrip(".") in allowed or m + ".0" in allowed:
             continue
-        if m in {"0", "1", "2", "3", "5"}:  # small counting words in prose
+        if m in {"1", "2", "3"}:  # ordinal words in prose (first, second, third)
             continue
         return False
     return True
 
 
+_ADVICE_VERBS = re.compile(
+    r"\b(buy|purchase|order|install|take|start|stop|switch to|move to|relocate|invest)\b", re.IGNORECASE)
+
+
 def action_guard(reply: str, plan: dict) -> bool:
-    """True unless the reply mentions an action id outside the plan."""
-    known = _action_ids(plan) | {"R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11"}
-    # reject only if it recommends an unknown action id pattern like 'id: xyz' or snake_case ids
+    """True unless the reply recommends something outside the plan's actions.
+
+    Two checks: snake_case tokens must be known action ids, and imperative
+    advice verbs (buy/move to/...) must not appear - the engine already phrased
+    every recommendation, so the model should rephrase, not add new advice.
+    """
+    known = _action_ids(plan) | {"R1", "R2", "R3", "R4", "R5", "R6", "R7",
+                                 "R8", "R9", "R10", "R11", "pm2_5", "pm10"}
     for word in re.findall(r"[a-z]+(?:_[a-z]+)+", reply):
         if word not in known:
             return False
-    return True
+    return not _ADVICE_VERBS.search(reply)
 
 
 def template_answer(plan: dict, question: str) -> str:
@@ -177,9 +186,3 @@ def wrap_delim(text: str) -> str:
     return f"<<DATA>>\n{text}\n<</DATA>>"
 
 
-async def explain_plan(plan: dict) -> dict:
-    """Grounded one-paragraph explanation of today's plan (AI if available)."""
-    summary = template_answer(plan, "summarize today's plan with best time and co2")
-    if not ai_available():
-        return {"answer": summary, "source": "template", "ai_used": False}
-    return await ask_ai(plan, "Explain today's plan in simple words for a family.")

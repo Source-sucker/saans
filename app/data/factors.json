@@ -15,22 +15,6 @@
     "year": 2024,
     "uncertainty": "UK average fleet; Indian petrol/diesel cars are broadly comparable in size and emissions class, but this is a proxy, not an India-specific factor."
   },
-  "motorbike_avg": {
-    "value": 0.11367,
-    "unit": "kg CO2e per km (average motorbike, petrol)",
-    "source_name": "UK DEFRA/DESNZ Greenhouse gas reporting: conversion factors 2024, condensed set",
-    "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
-    "year": 2024,
-    "uncertainty": "UK average motorbike; most Indian two-wheelers are smaller (70-125cc), so this overestimates. Proxy factor."
-  },
-  "bus_local": {
-    "value": 0.12999,
-    "unit": "kg CO2e per passenger-km (local bus)",
-    "source_name": "UK DEFRA/DESNZ Greenhouse gas reporting: conversion factors 2024, condensed set",
-    "source_url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2024",
-    "year": 2024,
-    "uncertainty": "UK local bus average; occupancy on Indian city buses is typically much higher, so per-passenger emissions are lower in practice. Proxy factor."
-  },
   "rail_national": {
     "value": 0.03546,
     "unit": "kg CO2e per passenger-km (national rail)",
@@ -62,14 +46,6 @@
     "source_url": "https://www.aceee.org/files/proceedings/2014/data/papers/9-702.pdf",
     "year": 2014,
     "uncertainty": "Gas-stove efficiency measured on US equipment; Indian LPG burner stoves are in a similar class."
-  },
-  "dmrc_metro_saving": {
-    "value": 32.38,
-    "unit": "grams CO2 saved per passenger-km when riding metro instead of a road vehicle",
-    "source_name": "Delhi Metro Rail Corporation (DMRC), figure from a TERI study, cited on DMRC's carbon-lite metro travel page",
-    "source_url": "https://delhimetrorail.com/carbonlite-metro-travel",
-    "year": 2024,
-    "uncertainty": "DMRC corporate figure comparing metro with an average road vehicle; the underlying study is not published in full, and the page is undated (accessed 2026-11-20)."
   },
   "lpg_kwh_per_kg": {
     "value": 12.762,

@@ -9,15 +9,19 @@ import json
 from pathlib import Path
 
 from .aqi import BANDS, worse_band
-from .impact import co2e_car_to_metro, co2e_carpool, co2e_induction_swap, load_factors
+from .impact import co2e_car_to_metro, co2e_induction_swap, load_factors
 
 DATA = Path(__file__).parent / "data"
 
 _BAND_MIN = {b: i for i, b in enumerate(BANDS)}
 
 
-def load_actions() -> list[dict]:
-    return json.loads((DATA / "actions.json").read_text())["actions"]
+from functools import lru_cache
+
+
+@lru_cache(maxsize=1)
+def load_actions() -> tuple[dict, ...]:
+    return tuple(json.loads((DATA / "actions.json").read_text())["actions"])
 
 
 def best_block(forecast: list[dict], window: int = 3, now: str | None = None) -> dict | None:
@@ -104,8 +108,6 @@ def _co2e(kind: str, ctx: dict, factors: dict) -> dict | None:
         return co2e_car_to_metro(factors, km) if km > 0 else None
     if kind == "induction_swap":
         return co2e_induction_swap(factors)
-    if kind == "carpool":
-        return co2e_carpool(factors, ctx.get("commute_km") or 0, ctx.get("carpool_passengers") or 2)
     return None
 
 
@@ -130,16 +132,14 @@ def build_plan(air: dict, profile: dict) -> dict:
         "aqi": air["aqi"],
         "has_purifier": home.get("purifier", False),
         "unvented_combustion": home.get("unvented_combustion", False),
-        "cooking_fuel": home.get("cooking_fuel"),
+        "cooking_fuel": (home.get("cooking_fuel") in ("lpg", "png") and "gas") or home.get("cooking_fuel"),
         "commute_mode": commute.get("mode"),
         "commute_km": commute.get("km"),
-        "carpool_passengers": commute.get("carpool_passengers", 2),
-        "best_block_start": best["start"] if best else "--:--",
         "block": best,
     }
     out = []
     fmt = ctx_fmt(ctx, best, air)
-    for a in load_actions():
+    for a in load_actions():  # cached tuple of dicts
         if not _applies(a, ctx):
             continue
         why = {
@@ -191,13 +191,11 @@ def build_plan(air: dict, profile: dict) -> dict:
 
 def ctx_fmt(ctx: dict, best: dict | None, air: dict) -> dict:
     """Substitution values for EN/HI templates (str() everything)."""
-    return {
-        "aqi": air["aqi"],
-        "band": ctx["band"],
-        "best_block_start": ctx["best_block_start"],
-        "best_block_end": best["end"] if best else "--:--",
-        "best_block_pm25": best["pm25"] if best else "n/a",
-    }
+    if best:
+        block, pm = f"{best['start']}-{best['end']}", best["pm25"]
+    else:  # no forecast (manual entry): plain words instead of placeholder junk
+        block, pm = "the lowest-pollution hours of your local forecast", "n/a"
+    return {"aqi": air["aqi"], "band": ctx["band"], "best_block": block, "best_block_pm25": pm}
 
 
 def _member_cards(profile: dict, eff: str) -> list[dict]:
@@ -224,8 +222,13 @@ def _member_cards(profile: dict, eff: str) -> list[dict]:
     return cards
 
 
-def community(plan: dict, households: int = 50) -> dict:
-    """RWA/school notice from the same engine, with the N-households total (R10)."""
+def community(plan: dict, households: int = 50) -> dict | None:
+    """RWA/school notice from the same engine, with the N-households total (R10).
+
+    Only generated when the effective band is Poor or worse (R10); None otherwise.
+    """
+    if _BAND_MIN[plan["band"]] < _BAND_MIN["Poor"]:
+        return None
     co2e_actions = [a for a in plan["actions"] if a.get("impact", {}).get("value")]
     per_home = sum(a["impact"]["value"] for a in co2e_actions if a["impact"]["value"] > 0)
     total = per_home * households

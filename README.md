@@ -45,8 +45,8 @@ notice) generated from the same engine.
 | R7 Elders/sensitive | Band ≥ Moderate: skip early-morning walks; prefer the best block; keep medicine/inhaler plan; symptoms → doctor. |
 | R8 Exercise | Band ≥ Poor: move indoors; otherwise the best block. |
 | R9 Heating | Never burn waste/biomass for warmth; layer up; efficient electric heating. |
-| R10 Community | Band ≥ Poor: generate the RWA/school notice with the N-households total. |
-| R11 Bad data | Data older than 3 h shown with a warning; upstream down or no network: sample scenario (labelled "sample") or manual AQI entry. |
+| R10 Community | Band ≥ Poor: generate the RWA/school notice with the N-households total; in cleaner air no notice is generated. |
+| R11 Bad data | Data older than 3 h (local-time aware) shown with a warning; upstream down, garbage, or no network: labelled sample scenario fallback (any city) or manual PM entry in the UI; unreachable data returns 503, never 500. |
 
 **Sensitive shift:** if any member is flagged sensitive, the effective band is
 shifted one step worse for the whole plan (stated as an assumption below).
@@ -122,28 +122,33 @@ pip install -r requirements.txt
 python -m pytest --cov=app --cov-report=term
 ```
 
-Measured on the final code (Python 3.12): **203 tests, 93% coverage** (aqi 95,
+Measured on the final code (Python 3.12): **205 tests, 93% coverage** (aqi 95,
 air_data 95, engine 97, impact 98, main 98, models 96, ai 81 – the uncovered ai
 lines are the real-Gemini call path, exercised only with a live key).
 
 Measured latency (single uvicorn worker, localhost, `scripts/bench_latency.py`
-methodology, 15–200 samples per path):
+methodology; 200 samples for the engine, 15 for cached, 4 for first-hit):
 
 | Path | Median | p95 |
 | --- | --- | --- |
 | `build_plan` (pure engine) | 0.2 ms | 0.2 ms |
 | `POST /api/plan` (cache hit) | 7.7 ms | 8.8 ms |
-| `POST /api/plan` (first hit, live fetch) | ~980 ms | ~2060 ms |
+| `POST /api/plan` (first hit, live fetch) | ~980 ms | ~2060 ms (4 samples) |
 
 ## Security
 
 - Pydantic validation on every input: enums for modes/fuels, numeric ranges,
   members ≤ 8, city ≤ 80 chars with a character whitelist, question ≤ 300 chars.
 - Output rendered with `textContent` only; no `innerHTML` in the frontend.
+- The AI guards are syntactic guardrails, not a full content filter: numguard
+  blocks numbers absent from the plan and the action guard blocks invented
+  action ids and imperative "buy/move to" advice, but a paraphrase attack can
+  still slip advice past them; the template fallback is always safe.
 - Headers on every response: `Content-Security-Policy: default-src 'self'`,
   `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
   `X-Frame-Options: DENY`, `Cache-Control: no-store`. No CORS.
-- Fixed-window rate limit (20 req/min per IP) on `/api/plan` and `/api/ask`.
+- Fixed-window rate limit (20 req/min per IP) on `/api/plan` and `/api/ask`;
+  unresolvable upstreams return 503 with a clear message, never a stack trace.
 - httpx timeouts (8 s) on upstream calls; upstream failure falls back to sample
   scenarios rather than retry loops.
 - Secrets only from environment; `.env` is gitignored; `.env.example` documents
@@ -167,7 +172,7 @@ the running app:
 - AQI band shown as icon + text (○ ◔ ◑ ◕ ● ◉), never colour alone.
 - Large-text toggle; `lang` attribute switches with the EN/HI toggle.
 - Native `<details>` for "Show the math"; print-friendly community message.
-- Contrast ≥ 4.5:1 on text colours; touch targets ≥ 44px; full keyboard use;
+- Contrast ≥ 4.5:1 on all text colours (computed per WCAG formula, including the six band chips); touch targets ≥ 44px; full keyboard use;
   `prefers-reduced-motion` respected; no horizontal scroll at 360px.
 
 Known gap: a formal axe/Lighthouse audit report is not included because this
@@ -177,7 +182,7 @@ manually against the running app (reproducible in any browser).
 ## Limitations
 
 - Air data is one model grid point per city (Open-Meteo/CAMS), not a station
-  average; CPCB bulletin values can differ. Manual entry is offered when the
+  average; CPCB bulletin values can differ. Manual entry (`/api/plan/manual`, also in the UI) is offered when the
   data is stale or absent (R11).
 - CO2e factors are UK proxies for vehicles and rail (no official Indian per-km
   factors); uncertainties are printed with every number.
@@ -186,6 +191,10 @@ manually against the running app (reproducible in any browser).
 - Exposure effects are qualitative ("lower", "much lower") – no invented
   percentages.
 - The app does not diagnose or treat; it defers symptoms to a doctor.
+- PM2.5 above 250 µg/m³ / PM10 above 430 µg/m³ map straight to AQI 500 (the
+  CPCB scale has no published extrapolation above the top breakpoint).
+- If any household uses unvented combustion (R2), the close-windows advice
+  (R1) is suppressed entirely rather than contradicted.
 - Single-process rate limiter and cache (in-memory) – fine for a demo, not a
   multi-worker deployment.
 - Hindi translations are machine-drafted; proofreading by a native speaker is

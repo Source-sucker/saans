@@ -5,7 +5,6 @@ from app.impact import (
     co2e_car_to_metro,
     co2e_carpool,
     co2e_induction_swap,
-    exposure_effect,
     load_factors,
 )
 
@@ -85,14 +84,3 @@ class TestFactorSources:
     def test_years_are_recent_ints(self):
         for name, f in load_factors().items():
             assert isinstance(f["year"], int) and 2010 <= f["year"] <= 2026, name
-
-
-class TestExposureEffect:
-    def test_known_levels(self):
-        assert exposure_effect("lower") == "Lower"
-        assert exposure_effect("much lower") == "Much lower"
-        assert exposure_effect("n/a") == "n/a"
-
-    def test_unknown_rejected(self):
-        with pytest.raises(ValueError):
-            exposure_effect("95%")

@@ -1,7 +1,9 @@
 """Saans API: routes, security headers, in-memory rate limit, static UI mount."""
 from __future__ import annotations
 
+import json
 import time
+from functools import lru_cache
 from pathlib import Path
 
 import httpx
@@ -76,8 +78,12 @@ def _client() -> httpx.AsyncClient:
 
 
 async def _resolve_air(city: str) -> dict:
-    async with _client() as client:
-        air = await air_data.get_air(city, client)
+    try:
+        async with _client() as client:
+            air = await air_data.get_air(city, client)
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=503,
+                            detail="Air data service unreachable and no sample available. Try again shortly.") from exc
     if air is None:
         raise HTTPException(status_code=404, detail=f"City not found: {city}. Try the sample cities: Delhi, Lucknow, Pune.")
     return air
@@ -103,7 +109,7 @@ async def plan_manual(req: ManualAQIRequest) -> dict:
         raise HTTPException(status_code=422, detail="Provide pm25 or pm10 (µg/m³).")
     a = aqi_of(req.pm25, req.pm10)
     air = {"city": req.city, "aqi": a, "band": band_of(a), "pm25": req.pm25, "pm10": req.pm10,
-           "forecast": [], "now": None, "stale": False, "sample": True,
+           "forecast": [], "now": None, "stale": False, "sample": False,
            "observed_at": None, "grap_stage": grap_stage(a, air_data.is_ncr(req.city)),
            "source": "manual entry (no forecast available)"}
     plan_dict = build_plan(air, req.profile.model_dump())
@@ -120,21 +126,17 @@ async def ask(req: AskRequest) -> dict:
     return result
 
 
-@app.get("/api/explain")
-async def explain_get() -> dict:
-    return {"ai_available": ai_available(),
-            "detail": "POST /api/ask with {question, city, profile}; or /api/plan and read the why/math fields."}
-
-
 @app.get("/api/health")
 async def health() -> dict:
     return {"status": "ok", "ai": ai_available()}
 
 
+@lru_cache(maxsize=1)
+def _strings() -> dict:
+    """UI strings EN/HI from one file; templates are deterministic, no model needed."""
+    return json.loads((Path(__file__).parent / "data" / "strings.json").read_text())
+
+
 @app.get("/api/strings")
 async def strings() -> dict:
-    """UI strings EN/HI from one file; templates are deterministic, no model needed."""
-    import json as _json
-    from pathlib import Path as _Path
-    path = _Path(__file__).parent / "data" / "strings.json"
-    return _json.loads(path.read_text())
+    return _strings()

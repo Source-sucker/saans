@@ -4,10 +4,12 @@
       "id": "vent_close",
       "rule_id": "R1",
       "category": "indoor",
-      "applies": { "band_min": "Poor" },
+      "applies": {
+        "band_min": "Poor"
+      },
       "priority": 100,
-      "en": "Keep windows shut today. Open only in the best window {best_block_start}-{best_block_end}, when outdoor PM2.5 is forecast lowest ({best_block_pm25} µg/m³).",
-      "hi": "आज खिड़कियां बंद रखें। केवल सबसे अच्छी खिड़की {best_block_start}-{best_block_end} में खोलें, जब बाहर PM2.5 सबसे कम ({best_block_pm25} µg/m³) अनुमानित है।",
+      "en": "Keep windows shut today. Open only in the best window {best_block}, when outdoor PM2.5 is forecast lowest ({best_block_pm25} µg/m³).",
+      "hi": "आज खिड़कियां बंद रखें। केवल सबसे अच्छी खिड़की {best_block} में खोलें, जब बाहर PM2.5 सबसे कम ({best_block_pm25} µg/m³) अनुमानित है।",
       "why_template": "Current AQI {aqi} ({band}) is Poor or worse, so outdoor air raises indoor PM2.5 faster than it clears. The window is the forecast 3-hour minimum-PM2.5 block.",
       "exposure": "lower"
     },
@@ -15,7 +17,9 @@
       "id": "vent_open",
       "rule_id": "R1",
       "category": "indoor",
-      "applies": { "band_max": "Satisfactory" },
+      "applies": {
+        "band_max": "Satisfactory"
+      },
       "priority": 90,
       "en": "Air quality is {band}. Open windows on opposite sides and cross-ventilate the house today.",
       "hi": "वायु गुणवत्ता {band} है। आज सामने-सामने की खिड़कियां खोलकर घर में समुचित वेंटिलेशन करें।",
@@ -26,7 +30,9 @@
       "id": "co_safety",
       "rule_id": "R2",
       "category": "safety",
-      "applies": { "unvented_combustion": true },
+      "applies": {
+        "unvented_combustion": true
+      },
       "priority": 1000,
       "en": "SAFETY: You use an unvented coal/angithi or heater indoors. Never seal the room while burning it - carbon monoxide has no smell and kills silently. Stop using it and ventilate now, whatever the AQI.",
       "hi": "सुरक्षा: आप घर के अंदर बिना वेंटिलेशन वाला अंगीठी/कोयला या हीटर इस्तेमाल करते हैं। जलाते समय कमरा कभी सील न करें - कार्बन मोनोक्साइड गंधहीन होता है और चुपचाप जान लेता है। इसे बंद करें और अभी वेंटिलेट करें, AQI जो भी हो।",
@@ -37,7 +43,10 @@
       "id": "purifier_run",
       "rule_id": "R3",
       "category": "indoor",
-      "applies": { "band_min": "Poor", "has_purifier": true },
+      "applies": {
+        "band_min": "Poor",
+        "has_purifier": true
+      },
       "priority": 95,
       "en": "Run your purifier on high during cooking (peak indoor PM2.5) and in the evening; keep it in the room where people spend most time.",
       "hi": "खाना बनाते समय (इनडोर PM2.5 चरम पर) और शाम को प्योरिफायर तेज़ पर चलाएं; इसे उस कमरे में रखें जहां सबसे ज्यादा समय बिताया जाता है।",
@@ -48,7 +57,10 @@
       "id": "diy_purifier",
       "rule_id": "R3",
       "category": "indoor",
-      "applies": { "band_min": "Poor", "has_purifier": false },
+      "applies": {
+        "band_min": "Poor",
+        "has_purifier": false
+      },
       "priority": 85,
       "en": "No purifier at home: build a DIY clean-air unit - a 20-inch box fan strapped to a MERV-13/14 furnace filter (Corsi-Rosenthal style). Place it in the sleeping room and run it on high. It pushes a room's air through the filter several times an hour.",
       "hi": "घर में प्योरिफायर नहीं है: DIY क्लीन-एयर यूनिट बनाएं - 20 इंच बॉक्स फैन के साथ MERV-13/14 फिल्टर (कोर्सी-रोज़ेन्थल शैली)। इसे सोने के कमरे में रखें और तेज़ पर चलाएं। यह एक घंटे में कमरे की हवा कई बार फिल्टर करता है।",
@@ -70,7 +82,9 @@
       "id": "swap_biomass_cooking",
       "rule_id": "R4",
       "category": "cooking",
-      "applies": { "cooking_fuel": "biomass" },
+      "applies": {
+        "cooking_fuel": "biomass"
+      },
       "priority": 99,
       "en": "Your cooking fuel is biomass/chulha. The top-ranked swap is LPG or PNG (biggest indoor PM2.5 and CO cut), or induction if gas is unavailable.",
       "hi": "आपका रसोई ईंधन बायोमास/चूल्हा है। सबसे अच्छा विकल्प LPG या PNG है (इनडोर PM2.5 और CO में सबसे बड़ी कटौती), या गैस न मिले तो इंडक्शन।",
@@ -81,7 +95,9 @@
       "id": "swap_gas_induction",
       "rule_id": "R4",
       "category": "cooking",
-      "applies": { "cooking_fuel": "gas" },
+      "applies": {
+        "cooking_fuel": "gas"
+      },
       "priority": 60,
       "co2e": "induction_swap",
       "en": "Consider switching the gas stove to induction. Note the honest math: on India's current grid, induction cooking is higher CO2e per meal than LPG (see Show the math), but it removes combustion pollutants from your kitchen.",
@@ -93,7 +109,13 @@
       "id": "commute_shift",
       "rule_id": "R5",
       "category": "commute",
-      "applies": { "band_min": "Very Poor", "commute_mode_any": ["walk", "cycle"] },
+      "applies": {
+        "band_min": "Very Poor",
+        "commute_mode_any": [
+          "walk",
+          "cycle"
+        ]
+      },
       "priority": 80,
       "en": "Walking or cycling in Very Poor air: shift the main commute to metro or bus, or go at an off-peak cleaner hour. If you must walk, keep it short and away from traffic junctions.",
       "hi": "बहुत खराब हवा में पैदल/साइकिल: मुख्य यात्रा के लिए मेट्रो या बस लें, या कम-भीड़ वाले साफ़ घंटे में जाएं। अगर पैदल जाना ही है तो छोटा रखें और ट्रैफिक जंक्शन से दूर रहें।",
@@ -104,7 +126,10 @@
       "id": "twowheeler_mask",
       "rule_id": "R5",
       "category": "commute",
-      "applies": { "band_min": "Poor", "commute_mode": "two_wheeler" },
+      "applies": {
+        "band_min": "Poor",
+        "commute_mode": "two_wheeler"
+      },
       "priority": 75,
       "en": "On a two-wheeler in Poor or worse air: wear a fitted N95/FFP2 mask (not cloth or surgical - they do little against PM2.5), and avoid long idling at red lights behind trucks.",
       "hi": "खराब या उससे बदतर हवा में दुपहिया पर: फिट वाला N95/FFP2 मास्क पहनें (कपड़े या सर्जिकल नहीं - वे PM2.5 के खिलाफ बहुत कम करते हैं), और ट्रकों के पीछे लंबे रेड-लाइट में न रुकें।",
@@ -115,7 +140,10 @@
       "id": "car_swap",
       "rule_id": "R5",
       "category": "commute",
-      "applies": { "band_min": "Moderate", "commute_mode": "car" },
+      "applies": {
+        "band_min": "Moderate",
+        "commute_mode": "car"
+      },
       "priority": 65,
       "co2e": "car_to_metro",
       "en": "Private car: consider carpooling or switching this trip to metro (CO2e math shown). While driving in smog, set AC to recirculate and keep windows up.",
@@ -127,7 +155,10 @@
       "id": "school_indoor",
       "rule_id": "R6",
       "category": "children",
-      "applies": { "band_min": "Very Poor", "has_child": true },
+      "applies": {
+        "band_min": "Very Poor",
+        "has_child": true
+      },
       "priority": 88,
       "en": "For children: keep play indoors today; ask the school to move PE/assembly indoors (see the community message). No masks for children aged 5 and under - WHO advises they do not need them.",
       "hi": "बच्चों के लिए: आज खेल घर के अंदर रखें; स्कूल से PE/असेंबली अंदर कराने को कहें (सामुदायिक संदेश देखें)। 5 वर्ष या उससे कम उम्र के बच्चों के लिए मास्क नहीं - WHO के अनुसार इन बच्चों को मास्क की आवश्यकता नहीं होती।",
@@ -139,10 +170,13 @@
       "id": "elder_walk",
       "rule_id": "R7",
       "category": "adults_elders",
-      "applies": { "band_min": "Moderate", "has_elder": true },
+      "applies": {
+        "band_min": "Moderate",
+        "has_elder": true
+      },
       "priority": 77,
-      "en": "For elders and sensitive members: skip the early-morning outdoor walk (PM2.5 peaks in the coldest hours); prefer the best block {best_block_start}-{best_block_end}. Keep inhalers/medicines handy and follow the existing plan; for symptoms (breathlessness, chest tightness) see a doctor.",
-      "hi": "बुजुर्गों/संवेदनशील सदस्यों के लिए: सुबह की जल्दी सैर रद्द करें (सबसे ठंडे घंटों में PM2.5 चरम पर होता है); सबसे अच्छा समय {best_block_start}-{best_block_end} चुनें। इनहेलर/दवाएं पास रखें और मौजूदा योजना का पालन करें; लक्षण होने पर (सांस फूलना, सीने में जकड़न) डॉक्टर से मिलें।",
+      "en": "For elders and sensitive members: skip the early-morning outdoor walk (PM2.5 peaks in the coldest hours); prefer the best block {best_block}. Keep inhalers/medicines handy and follow the existing plan; for symptoms (breathlessness, chest tightness) see a doctor.",
+      "hi": "बुजुर्गों/संवेदनशील सदस्यों के लिए: सुबह की जल्दी सैर रद्द करें (सबसे ठंडे घंटों में PM2.5 चरम पर होता है); सबसे अच्छा समय {best_block} चुनें। इनहेलर/दवाएं पास रखें और मौजूदा योजना का पालन करें; लक्षण होने पर (सांस फूलना, सीने में जकड़न) डॉक्टर से मिलें।",
       "why_template": "Band {band} or worse with an elder or sensitive member in the house. Cold early-morning air holds the daily PM2.5 peak; the forecast best block minimises dose for the same walk.",
       "exposure": "lower"
     },
@@ -150,10 +184,12 @@
       "id": "exercise_indoor",
       "rule_id": "R8",
       "category": "adults_elders",
-      "applies": { "band_min": "Poor" },
+      "applies": {
+        "band_min": "Poor"
+      },
       "priority": 72,
-      "en": "Move today's run/cycle session indoors (home workout). If you go out, use the best block {best_block_start}-{best_block_end}.",
-      "hi": "आज का दौड़/साइकिल सत्र घर के अंदर ले जाएं (होम वर्कआउट)। बाहर जाना हो तो सबसे अच्छा समय {best_block_start}-{best_block_end} चुनें।",
+      "en": "Move today's run/cycle session indoors (home workout). If you go out, use the best block {best_block}.",
+      "hi": "आज का दौड़/साइकिल सत्र घर के अंदर ले जाएं (होम वर्कआउट)। बाहर जाना हो तो सबसे अच्छा समय {best_block} चुनें।",
       "why_template": "Band {band} or worse: heavy breathing during exercise multiplies PM2.5 uptake several-fold.",
       "exposure": "much lower"
     },
@@ -172,7 +208,9 @@
       "id": "community_notice",
       "rule_id": "R10",
       "category": "community",
-      "applies": { "band_min": "Poor" },
+      "applies": {
+        "band_min": "Poor"
+      },
       "priority": 50,
       "en": "Ready-to-send notice for your RWA/school: no waste or leaf burning, dust control on any construction inside the colony, carpool for school runs, and go easy on diesel generators. Full message in the Community card, with the N-households total.",
       "hi": "आपके RWA/स्कूल के लिए तैयार सूचना: कचरा/पत्तियां न जलाना, कॉलोनी के भीतर निर्माण पर धूल नियंत्रण, स्कूल रन के लिए कारपूल, और डीज़ल जेनरेटर कम से कम। पूरा संदेश सामुदायिक कार्ड में है, N-परिवारों के कुल के साथ।",
