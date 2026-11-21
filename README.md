@@ -115,6 +115,13 @@ uvicorn app.main:app --reload   # http://127.0.0.1:8000
 Optional: `cp .env.example .env` and set `GEMINI_API_KEY` for the AI answers
 layer. Without it, everything works with deterministic template answers.
 
+### Live preview (deploy)
+
+The repo ships `render.yaml`. On Render.com: New -> Web Service -> connect this
+repo -> it auto-detects the config (free plan, uvicorn start command, Python
+3.12). No environment variables are required; set `GEMINI_API_KEY` only if you
+want Gemini-powered answers instead of the deterministic templates.
+
 ## Test
 
 ```bash
