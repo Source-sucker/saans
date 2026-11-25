@@ -79,7 +79,7 @@ class TestTemplateFallback:
 class TestStubbedModelAdversarial:
     """The model is replaced by hostile outputs; ask_ai must fall back."""
 
-    def _install_stub(self, monkeypatch, reply_text=None, raise_exc=None):
+    def _install_stub(self, monkeypatch, reply_text=None, raise_exc=None, seen=None):
         """Inject a fake google.genai module producing the hostile reply."""
         import sys
         import types
@@ -88,6 +88,8 @@ class TestStubbedModelAdversarial:
             text = reply_text
 
         async def generate_content(*, model, contents, config=None):
+            if seen is not None:
+                seen["model"] = model
             if raise_exc:
                 raise raise_exc
             return FakeResponse()
@@ -138,3 +140,25 @@ class TestStubbedModelAdversarial:
         result = asyncio.run(ask_ai(plan, "when to open windows?"))
         assert result["ai_used"] is True
         assert result["source"] == "gemini"
+
+    def test_default_model_is_not_retired(self, plan, monkeypatch):
+        """gemini-2.0-flash was retired 2026-06-01; the default must be served."""
+        import asyncio
+        seen = {}
+        monkeypatch.delenv("GEMINI_MODEL", raising=False)
+        self._install_stub(monkeypatch, reply_text="Fine.", seen=seen)
+        from app.ai import ask_ai, _DEFAULT_MODEL
+        asyncio.run(ask_ai(plan, "hello"))
+        assert seen["model"] == _DEFAULT_MODEL
+        assert seen["model"] != "gemini-2.0-flash"
+
+    def test_model_env_override(self, plan, monkeypatch):
+        """GEMINI_MODEL overrides the model name without code changes."""
+        import asyncio
+        seen = {}
+        monkeypatch.setenv("GEMINI_MODEL", "gemini-3.8-flash")
+        self._install_stub(monkeypatch, reply_text="Fine.", seen=seen)
+        from app.ai import ask_ai
+        asyncio.run(ask_ai(plan, "hello again"))
+        assert seen["model"] == "gemini-3.8-flash"
+

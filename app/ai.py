@@ -21,6 +21,10 @@ SYSTEM = (
 )
 
 _MAX_TOKENS = 300
+# gemini-2.0-flash was retired by Google on 2026-06-01; gemini-3.6-flash is the
+# recommended GA replacement (https://aistudio.google.com/docs/deprecations).
+# Override without code changes via the GEMINI_MODEL environment variable.
+_DEFAULT_MODEL = "gemini-3.6-flash"
 
 
 def ai_available() -> bool:
@@ -170,7 +174,7 @@ async def ask_ai(plan: dict, question: str) -> dict:
         prompt = (f"{SYSTEM}\n\nPLAN JSON:\n{wrap_delim(_plan_compact(plan))}\n\n"
                   f"QUESTION:\n{wrap_delim(question)}\n\nAnswer:")
         response = await client.aio.models.generate_content(
-            model="gemini-2.0-flash", contents=prompt,
+            model=os.environ.get("GEMINI_MODEL", _DEFAULT_MODEL), contents=prompt,
             config={"max_output_tokens": _MAX_TOKENS})
         reply = (response.text or "").strip()
         if not reply or not numguard(reply, plan) or not action_guard(reply, plan):

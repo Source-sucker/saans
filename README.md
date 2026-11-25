@@ -113,7 +113,9 @@ uvicorn app.main:app --reload   # http://127.0.0.1:8000
 ```
 
 Optional: `cp .env.example .env` and set `GEMINI_API_KEY` for the AI answers
-layer. Without it, everything works with deterministic template answers.
+layer. Without it, everything works with deterministic template answers. With a
+key, the model defaults to `gemini-3.6-flash` (gemini-2.0-flash was retired by
+Google on 2026-06-01) and can be changed with `GEMINI_MODEL`.
 
 ### Live preview (deploy)
 
@@ -129,8 +131,8 @@ pip install -r requirements.txt
 python -m pytest --cov=app --cov-report=term
 ```
 
-Measured on the final code (Python 3.12): **205 tests, 94% coverage** (aqi 95,
-air_data 95, engine 97, impact 98, main 98, models 96, ai 81 – the uncovered ai
+Measured on the final code (Python 3.12): **207 tests, 94% coverage** (aqi 96,
+air_data 94, engine 98, impact 97, main 97, models 95, ai 83 – the uncovered ai
 lines are the real-Gemini call path, exercised only with a live key).
 
 Measured latency (single uvicorn worker, localhost, `scripts/bench_latency.py`
